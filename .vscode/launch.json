@@ -1,0 +1,87 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Train QCWT",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/causality_grammar-DB41/src/qcwt/train_qcwt.py",
+            "args": [
+                "--parquet_path", "causality-grammar/logic_explanations",
+                "--data_file", "deepseek_3.6k_RP_test.parquet",
+                "--model_name", "Qwen/Qwen2.5-0.5B-Instruct",
+                "--steps", "1000",
+                "--lr", "1e-4",
+                "--M", "4",
+                "--tau", "1.0",
+                "--lambda_entropy", "0.01",
+                "--log_every", "10",
+                "--inspect_every", "200",
+                "--save_every", "500",
+                "--checkpoint_dir", "${workspaceFolder}/causality_grammar-DB41/src/qcwt/checkpoints"
+            ],
+            "cwd": "${workspaceFolder}/causality_grammar-DB41/src/qcwt",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTORCH_ENABLE_MPS_FALLBACK": "1"
+            }
+        },
+        {
+            "name": "Train QCWT (Debug - Small)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/causality_grammar-DB41/src/qcwt/train_qcwt.py",
+            "args": [
+                "--parquet_path", "causality-grammar/logic_explanations",
+                "--data_file", "deepseek_3.6k_RP_test.parquet",
+                "--model_name", "Qwen/Qwen2.5-0.5B-Instruct",
+                "--steps", "50",
+                "--lr", "1e-4",
+                "--M", "2",
+                "--tau", "1.0",
+                "--lambda_entropy", "0.01",
+                "--log_every", "5",
+                "--inspect_every", "20",
+                "--save_every", "25",
+                "--checkpoint_dir", "${workspaceFolder}/causality_grammar-DB41/src/qcwt/checkpoints"
+            ],
+            "cwd": "${workspaceFolder}/causality_grammar-DB41/src/qcwt",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "env": {
+                "PYTORCH_ENABLE_MPS_FALLBACK": "1"
+            }
+        },
+        {
+            "name": "Test Dataset Loading",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/causality_grammar-DB41/src/qcwt/dataset_logic.py",
+            "args": [
+                "causality-grammar/logic_explanations"
+            ],
+            "cwd": "${workspaceFolder}/causality_grammar-DB41/src/qcwt",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Test Workspace Inspect Module",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/causality_grammar-DB41/src/qcwt/workspace_inspect.py",
+            "cwd": "${workspaceFolder}/causality_grammar-DB41/src/qcwt",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Test QCWT Module",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/causality_grammar-DB41/src/qcwt/qcwt.py",
+            "cwd": "${workspaceFolder}/causality_grammar-DB41/src/qcwt",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
