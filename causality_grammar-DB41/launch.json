@@ -1,0 +1,62 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug: Verify Assumption5 (Single Sample)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/verify_assumption5.py",
+            "console": "integratedTerminal",
+            "python": "${command:python.interpreterPath}",
+            "args": [
+                "--data_path", "data/assumption5_data.csv",
+                "--model_name", "Qwen/Qwen2.5-1.5B-Instruct",
+                "--output_dir", "results/assumption5_debug",
+                "--num_samples", "1",
+                "--num_random_negatives", "2",
+                "--num_hard_negatives", "2",
+                "--lora_r", "8",
+                "--lora_alpha", "16",
+                "--seed", "42"
+            ],
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "CUDA_VISIBLE_DEVICES": "0"
+            }
+        },
+        {
+            "name": "Debug: Verify Assumption5 (3 Samples)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/verify_assumption5.py",
+            "console": "integratedTerminal",
+            "python": "${command:python.interpreterPath}",
+            "args": [
+                "--data_path", "data/assumption5_data.csv",
+                "--model_name", "Qwen/Qwen2.5-1.5B-Instruct",
+                "--output_dir", "results/assumption5_debug",
+                "--num_samples", "3",
+                "--num_random_negatives", "3",
+                "--num_hard_negatives", "3",
+                "--lora_r", "8",
+                "--lora_alpha", "16",
+                "--seed", "42"
+            ],
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "CUDA_VISIBLE_DEVICES": "0"
+            }
+        },
+        {
+            "name": "Debug: Near-Miss Generation Only",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_near_miss_generation.py",
+            "console": "integratedTerminal",
+            "python": "${command:python.interpreterPath}",
+            "justMyCode": true
+        }
+    ]
+}
