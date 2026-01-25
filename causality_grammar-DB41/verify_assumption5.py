@@ -331,35 +331,25 @@ def load_model_and_tokenizer(
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     
-    # Check if GPU is available
-    use_quantization = device == "cuda" and torch.cuda.is_available()
+    # Disable quantization for gradient computation - it causes cuBLAS errors
+    # Load model in float16 without quantization
+    print("Loading model in float16 without quantization (for stable gradient computation)")
     
-    if use_quantization:
-        print("Using 4-bit quantization (QLoRA mode)")
-        # Quantization config for 4-bit
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_use_double_quant=True,
-        )
-        
-        # Load base model with quantization
+    if device == "cuda" and torch.cuda.is_available():
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            quantization_config=bnb_config,
             device_map="auto",
             trust_remote_code=True,
             torch_dtype=torch.float16,
+            low_cpu_mem_usage=True,
         )
     else:
-        print("Using CPU mode (no quantization) - this may be slow for large models")
-        # Load model without quantization for CPU
+        print("Using CPU mode - this may be slow for large models")
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            device_map=None,  # Don't use device_map for CPU
+            device_map=None,
             trust_remote_code=True,
-            torch_dtype=torch.float32,  # Use float32 for CPU
+            torch_dtype=torch.float32,
             low_cpu_mem_usage=True,
         )
         model = model.to(device)
@@ -378,8 +368,18 @@ def load_model_and_tokenizer(
             lora_dropout=0.05,
             target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
             bias="none",
+            inference_mode=False,  # Ensure training mode
         )
         model = get_peft_model(model, lora_config)
+        
+        # Ensure LoRA parameters are in the right dtype
+        for name, param in model.named_parameters():
+            if 'lora' in name.lower() and param.requires_grad:
+                param.data = param.data.to(torch.float32)
+    
+    # Disable gradient checkpointing to avoid dtype issues with quantization
+    if hasattr(model, 'gradient_checkpointing_disable'):
+        model.gradient_checkpointing_disable()
     
     model.print_trainable_parameters()
     
@@ -424,37 +424,43 @@ def compute_logp_and_grad(
     # Get prompt length to mask loss
     prompt_len = prompt_tokens["input_ids"].shape[1]
     
-    # Forward pass with autocast for mixed precision
-    with torch.cuda.amp.autocast(enabled=(device == "cuda")):
-        outputs = model(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-        )
-        
-        # Compute log probability only for proof tokens (after prompt)
-        logits = outputs.logits[:, :-1, :].float()  # Cast to float32 for numerical stability
-        labels = input_ids[:, 1:]  # Shifted labels
-        
-        # Mask prompt tokens
-        mask = torch.zeros_like(labels, dtype=torch.float32, device=device)
-        mask[:, prompt_len-1:] = 1.0  # Only compute for proof tokens
-        
-        # Log probabilities for each token
-        log_probs = F.log_softmax(logits, dim=-1)
-        token_log_probs = log_probs.gather(dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
-        
-        # Average log probability over proof tokens
-        masked_log_probs = token_log_probs * mask
-        total_log_prob = masked_log_probs.sum() / (mask.sum() + 1e-8)
+    # Forward pass
+    outputs = model(
+        input_ids=input_ids,
+        attention_mask=attention_mask,
+    )
     
-    # Backward pass to compute gradients (outside autocast for stable gradients)
+    # Compute log probability only for proof tokens (after prompt)
+    logits = outputs.logits[:, :-1, :]  # Shift for next-token prediction
+    labels = input_ids[:, 1:]  # Shifted labels
+    
+    # Convert logits to float32 for stable computation
+    logits = logits.float()
+    
+    # Mask prompt tokens
+    mask = torch.zeros(labels.shape, dtype=torch.float32, device=labels.device)
+    mask[:, prompt_len-1:] = 1.0  # Only compute for proof tokens
+    
+    # Log probabilities for each token
+    log_probs = F.log_softmax(logits, dim=-1)
+    token_log_probs = log_probs.gather(dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
+    
+    # Average log probability over proof tokens
+    masked_log_probs = token_log_probs * mask
+    total_log_prob = masked_log_probs.sum() / (mask.sum() + 1e-8)
+    
+    # Backward pass to compute gradients
     total_log_prob.backward()
     
     # Extract LoRA gradients and flatten
     grad_list = []
     for name, param in model.named_parameters():
         if param.requires_grad and param.grad is not None:
-            grad_list.append(param.grad.detach().view(-1).float())
+            # Skip quantized parameters that don't have proper gradients
+            if 'lora' in name.lower():  # Only extract LoRA gradients
+                grad_tensor = param.grad.detach()
+                if grad_tensor.dtype in [torch.float16, torch.float32, torch.float64, torch.bfloat16]:
+                    grad_list.append(grad_tensor.view(-1).float())
     
     if grad_list:
         flat_grad = torch.cat(grad_list)
