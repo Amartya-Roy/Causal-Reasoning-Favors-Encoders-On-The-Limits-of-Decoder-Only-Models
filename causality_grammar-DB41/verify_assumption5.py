@@ -424,30 +424,30 @@ def compute_logp_and_grad(
     # Get prompt length to mask loss
     prompt_len = prompt_tokens["input_ids"].shape[1]
     
-    # Forward pass
-    outputs = model(
-        input_ids=input_ids,
-        attention_mask=attention_mask,
-        labels=input_ids.clone(),  # For loss computation
-    )
+    # Forward pass with autocast for mixed precision
+    with torch.cuda.amp.autocast(enabled=(device == "cuda")):
+        outputs = model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+        )
+        
+        # Compute log probability only for proof tokens (after prompt)
+        logits = outputs.logits[:, :-1, :].float()  # Cast to float32 for numerical stability
+        labels = input_ids[:, 1:]  # Shifted labels
+        
+        # Mask prompt tokens
+        mask = torch.zeros_like(labels, dtype=torch.float32, device=device)
+        mask[:, prompt_len-1:] = 1.0  # Only compute for proof tokens
+        
+        # Log probabilities for each token
+        log_probs = F.log_softmax(logits, dim=-1)
+        token_log_probs = log_probs.gather(dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
+        
+        # Average log probability over proof tokens
+        masked_log_probs = token_log_probs * mask
+        total_log_prob = masked_log_probs.sum() / (mask.sum() + 1e-8)
     
-    # Compute log probability only for proof tokens (after prompt)
-    logits = outputs.logits[:, :-1, :]  # Shift for next-token prediction
-    labels = input_ids[:, 1:]  # Shifted labels
-    
-    # Mask prompt tokens
-    mask = torch.zeros_like(labels, dtype=torch.float)
-    mask[:, prompt_len-1:] = 1.0  # Only compute for proof tokens
-    
-    # Log probabilities for each token
-    log_probs = F.log_softmax(logits, dim=-1)
-    token_log_probs = log_probs.gather(dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
-    
-    # Average log probability over proof tokens
-    masked_log_probs = token_log_probs * mask
-    total_log_prob = masked_log_probs.sum() / (mask.sum() + 1e-8)
-    
-    # Backward pass to compute gradients
+    # Backward pass to compute gradients (outside autocast for stable gradients)
     total_log_prob.backward()
     
     # Extract LoRA gradients and flatten
