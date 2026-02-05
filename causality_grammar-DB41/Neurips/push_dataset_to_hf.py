@@ -17,8 +17,8 @@ else:
 # Repositories and folders to upload
 repo_id = "Amartya77/LogicBench_Test"
 folders_to_upload = [
-    "/home/omy1cob/Causal_LLM/causality_grammar-DB41/results/inference_hf_bashcache_depth0-50",
-    "/home/omy1cob/Causal_LLM/causality_grammar-DB41/results/inference_repair_depth0-50",
+    "/home/amartya/Causal_LLM/causality_grammar-DB41/results/inference_hf_bashcache_depth0-50",
+    "/home/amartya/Causal_LLM/causality_grammar-DB41/results/inference_repair_depth0-50",
 ]
 
 allowed_exts = ('.parquet', '.csv', '.jsonl', '.json', '.txt')
