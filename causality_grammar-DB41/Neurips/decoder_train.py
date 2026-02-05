@@ -282,7 +282,7 @@ def main(base_path, model_name):
 
 if __name__ == "__main__":
 
-    base_path = "/home/omy1cob/Causal_LLM/causality_grammar-DB41"
+    base_path = "/home/amartya/Causal_LLM/causality_grammar-DB41"
     model_name = "Qwen3-1.7B"
     # model_name = "Llama-3.2-1B-Instruct"
     main(base_path, model_name)
