@@ -104,13 +104,13 @@ def load_accuracy_metrics(results_dir):
 
 def main():
     # Paths
-    repair_dir = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/results/inference_repair_depth0-50"
-    standard_dir = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/results/inference_hf_bashcache_depth0-50"
+    repair_dir = "/home/amartya/Causal_LLM/causality_grammar-DB41/results/inference_repair_depth0-50"
+    standard_dir = "/home/amartya/Causal_LLM/causality_grammar-DB41/results/inference_hf_bashcache_depth0-50"
     
     repair_proofs_path = os.path.join(repair_dir, "repaired-proof-chains.json")
     standard_proofs_path = os.path.join(standard_dir, "model-proof-chains.json")
-    dataset_path = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/data/alice_test_depth0-50_complete.parquet"
-    output_path = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/results/proof_quality_comparison_new.json"
+    dataset_path = "/home/amartya/Causal_LLM/causality_grammar-DB41/data/alice_test_depth0-50_complete.parquet"
+    output_path = "/home/amartya/Causal_LLM/causality_grammar-DB41/results/proof_quality_comparison_new.json"
     
     print("="*100)
     print("PROOF QUALITY COMPARISON: Repair vs Standard Model")
