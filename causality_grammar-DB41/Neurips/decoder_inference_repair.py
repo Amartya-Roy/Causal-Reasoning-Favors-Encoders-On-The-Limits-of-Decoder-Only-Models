@@ -452,17 +452,17 @@ def main(
 
 
 if __name__ == "__main__":
-    hf_home_path = "/home/omy1cob/Causal_LLM/causality_grammar-DB41"
-    output_base_path = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/results/inference_repair_depth0-50"
-    # dataset_path = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/data/nl-depth12_test.parquet"
-    dataset_path = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/data/alice_test_depth0-50_complete.parquet"
+    hf_home_path = "/home/amartya/Causal_LLM/causality_grammar-DB41"
+    output_base_path = "/home/amartya/Causal_LLM/causality_grammar-DB41/results/inference_repair_depth0-50"
+    # dataset_path = "/home/amartya/Causal_LLM/causality_grammar-DB41/data/nl-depth12_test.parquet"
+    dataset_path = "/home/amartya/Causal_LLM/causality_grammar-DB41/data/alice_test_depth0-50_complete.parquet"
    
 
     # Put your finetuned checkpoint here. Can be a local path or a Hugging Face Hub ID.
     # Example HF model ID: "Amartya77/LogicBench-Qwen-FT-Response"
     finetuned_model_path = "Amartya77/LogicBench-Qwen-FT-Response"
     # Unsloth cache dir (keep your existing)
-    cache_dir = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/models"
+    cache_dir = "/home/amartya/Causal_LLM/causality_grammar-DB41/models"
 
     main(
         hf_home_path=hf_home_path,
