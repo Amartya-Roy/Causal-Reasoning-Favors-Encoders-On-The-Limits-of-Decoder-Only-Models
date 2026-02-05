@@ -1,0 +1,17 @@
+Assumption 5 Verification Summary
+==================================================
+
+Total pairs analyzed: 353
+Near-miss pairs: 207
+Random pairs: 73
+Hard pairs: 73
+
+Mean Cosine Similarity:
+  Near-miss: 0.5980
+  Random: 0.1948
+  Hard: 0.2408
+
+Mean Relative Difference:
+  Near-miss: 0.4675
+  Random: 0.7135
+  Hard: 0.6666
