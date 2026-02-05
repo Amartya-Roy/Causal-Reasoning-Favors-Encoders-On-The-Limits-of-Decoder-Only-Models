@@ -82,4 +82,5 @@ plot_jacobian_proximity_results(
     show=True
 )
 
-print("\n✅ Analysis complete!")
+print("\nAnalysis complete!")
+
