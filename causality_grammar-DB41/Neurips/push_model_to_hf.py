@@ -10,7 +10,7 @@ print("Logging in to Hugging Face...")
 login()
 
 # Model directory
-model_path = "/home/omy1cob/Causal_LLM/causality_grammar-DB41/models/Qwen3-1.7B-repair-fullfinetuned-temp/checkpoint-30000"
+model_path = "/home/amartya/Causal_LLM/causality_grammar-DB41/models/Qwen3-1.7B-repair-fullfinetuned-temp/checkpoint-30000"
 
 # Check if model exists
 if not os.path.exists(model_path):
